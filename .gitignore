@@ -1,0 +1,8 @@
+# Python environment and caches (made on your computer by uv; never commit them)
+.venv/
+__pycache__/
+*.pyc
+
+# MuJoCo and OS files
+MUJOCO_LOG.TXT
+.DS_Store

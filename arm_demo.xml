@@ -1,0 +1,63 @@
+<mujoco model="Onboarding six joint teaching arm">
+  <!-- Teaching model: no gravity, no arm contacts, simplified geometry/inertia. -->
+  <compiler angle="radian"/>
+  <option timestep="0.002" gravity="0 0 0" integrator="implicitfast"/>
+  <visual>
+    <global offwidth="1600" offheight="1000"/>
+    <headlight ambient="0.5 0.5 0.5" diffuse="0.5 0.5 0.5" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.9 0.92 0.94 1"/>
+  </visual>
+  <default>
+    <joint type="hinge" limited="true" range="-2.5 2.5" damping="0.5" armature="0.02"/>
+    <geom type="capsule" size="0.027" density="500" contype="0" conaffinity="0" rgba="0.72 0.1 0.16 1"/>
+    <position kp="40" kv="8" ctrllimited="true" ctrlrange="-2.5 2.5"/>
+  </default>
+  <asset>
+    <texture name="floor" type="2d" builtin="checker" rgb1="0.89 0.91 0.92" rgb2="0.95 0.96 0.97" width="512" height="512"/>
+    <material name="floor" texture="floor" texrepeat="4 4" reflectance="0.05"/>
+  </asset>
+  <worldbody>
+    <light pos="0 -1 2" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <geom type="plane" size="2 2 0.1" material="floor" rgba="1 1 1 1"/>
+    <geom type="cylinder" size="0.11 0.025" pos="0 0 0.025" rgba="0.18 0.22 0.27 1"/>
+    <body name="base" pos="0 0 0.05">
+      <joint name="j1" axis="0 0 1"/>
+      <geom fromto="0 0 0 0 0 0.28" size="0.045"/>
+      <geom type="sphere" size="0.055" pos="0 0 0.28" rgba="0.2 0.25 0.3 1"/>
+      <body name="shoulder" pos="0 0 0.28">
+        <joint name="j2" axis="0 1 0"/>
+        <geom fromto="0 0 0 0.25 0 0" size="0.037"/>
+        <body name="elbow" pos="0.25 0 0">
+          <joint name="j3" axis="0 1 0"/>
+          <geom type="sphere" size="0.043" rgba="0.2 0.25 0.3 1"/>
+          <geom fromto="0 0 0 0.22 0 0" size="0.032"/>
+          <body name="wrist1" pos="0.22 0 0">
+            <joint name="j4" axis="1 0 0"/>
+            <geom fromto="0 0 0 0.16 0 0"/>
+            <body name="wrist2" pos="0.16 0 0">
+              <joint name="j5" axis="0 1 0"/>
+              <geom type="sphere" size="0.036" rgba="0.2 0.25 0.3 1"/>
+              <geom fromto="0 0 0 0.12 0 0"/>
+              <body name="tool" pos="0.12 0 0">
+                <joint name="j6" axis="1 0 0"/>
+                <geom fromto="0 0 0 0.07 0 0" rgba="0.25 0.3 0.35 1"/>
+                <geom fromto="0.07 -0.05 0 0.07 0.05 0" size="0.012" rgba="0.25 0.3 0.35 1"/>
+                <geom fromto="0.07 -0.05 0 0.13 -0.05 0" size="0.012" rgba="0.25 0.3 0.35 1"/>
+                <geom fromto="0.07 0.05 0 0.13 0.05 0" size="0.012" rgba="0.25 0.3 0.35 1"/>
+                <site name="tool_tip" pos="0.13 0 0" size="0.012" rgba="0.1 0.55 0.8 1"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="a1" joint="j1"/>
+    <position name="a2" joint="j2"/>
+    <position name="a3" joint="j3"/>
+    <position name="a4" joint="j4"/>
+    <position name="a5" joint="j5"/>
+    <position name="a6" joint="j6"/>
+  </actuator>
+</mujoco>

@@ -1,0 +1,66 @@
+[
+  {
+    "path": "Arm.urdf",
+    "size": 9932,
+    "sha256": "b929f707edb1862874aa0ee66cc1823d015f9eea4573b51296a41166c6440189",
+    "git_blob_sha1": "959cd0f5094f3bfe1cd41d0cb45b70955522ad32",
+    "remote_blob_sha1": "959cd0f5094f3bfe1cd41d0cb45b70955522ad32",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Base_Joint.stl",
+    "size": 564184,
+    "sha256": "b1d94a99b99020be2f6ea8b85f131a8fe4f01c1bb18e7af2e3c31862e47892ac",
+    "git_blob_sha1": "edd50d5af74d64dd12523a800e82a490d87a3b8a",
+    "remote_blob_sha1": "edd50d5af74d64dd12523a800e82a490d87a3b8a",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_1.stl",
+    "size": 694484,
+    "sha256": "f36ec1e68beaefa726bf12a557cbd1fc2c88558ea113ef11d29af86f2965d369",
+    "git_blob_sha1": "f9339513cd84c00c692465f3d4b6362784874db7",
+    "remote_blob_sha1": "f9339513cd84c00c692465f3d4b6362784874db7",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_2.stl",
+    "size": 1060484,
+    "sha256": "0b175d492eb03f7468f0ec4095f2abf9d9a7dfbcec60148d513ca06dbda67552",
+    "git_blob_sha1": "87f2d53457f05b1ff9cb8e5fc27a7e424fc05106",
+    "remote_blob_sha1": "87f2d53457f05b1ff9cb8e5fc27a7e424fc05106",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_3.stl",
+    "size": 1466984,
+    "sha256": "90ea07f9c05a8e6bc4904903b3eb76dd87e9611750a9978ce2d1dd6ee39afac2",
+    "git_blob_sha1": "0ae198d0c371a4c9d03ffebf3820b49f2ce3924a",
+    "remote_blob_sha1": "0ae198d0c371a4c9d03ffebf3820b49f2ce3924a",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_4.stl",
+    "size": 504884,
+    "sha256": "88d38e9370bd3e96c402ae7dad8b29d565255a6a2dbf1a2d013f10ce5be4977f",
+    "git_blob_sha1": "2e76f91eb88b51d0951c330f1340399dc14b4ec6",
+    "remote_blob_sha1": "2e76f91eb88b51d0951c330f1340399dc14b4ec6",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_5.stl",
+    "size": 501084,
+    "sha256": "28a6385523bb67819fd31a9ee1affcd3d0ffb4f25b49a2f08bbf3732e0b9115c",
+    "git_blob_sha1": "5a6b434be5d696044d11e30b9c9327f27254e50b",
+    "remote_blob_sha1": "5a6b434be5d696044d11e30b9c9327f27254e50b",
+    "matches_remote": true
+  },
+  {
+    "path": "meshes/Joint_6.stl",
+    "size": 73084,
+    "sha256": "79165ffe95dd7ddf7f9940f2b714f661fc21be1f8d6e04b7c6a107b6d0716228",
+    "git_blob_sha1": "79277de485bd1583c2abacebf8af39470c1e0425",
+    "remote_blob_sha1": "79277de485bd1583c2abacebf8af39470c1e0425",
+    "matches_remote": true
+  }
+]

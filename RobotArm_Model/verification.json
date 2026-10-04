@@ -1,0 +1,100 @@
+{
+  "source_path": "https://github.com/Cougar-AI/robotarm-cai-ruh/tree/5bebc2e7a270d64ced6b34bcddc509881ad71ad3/software/robotviewer/models/RobotArm/Arm.urdf",
+  "source_sha256": "b929f707edb1862874aa0ee66cc1823d015f9eea4573b51296a41166c6440189",
+  "mujoco_version": "3.10.0",
+  "python": "3.11.13",
+  "host": "Darwin arm64",
+  "source_counts": {
+    "nq": 6,
+    "nv": 6,
+    "nu": 0,
+    "njnt": 6,
+    "ngeom": 7,
+    "nmesh": 7
+  },
+  "joints": [
+    {
+      "name": "Base_Joint_Joint1",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 0
+    },
+    {
+      "name": "Joint_1_Joint2",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 1
+    },
+    {
+      "name": "Joint_2_Joint3",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 2
+    },
+    {
+      "name": "Joint_3_Joint4",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 3
+    },
+    {
+      "name": "Joint_4_Joint5",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 4
+    },
+    {
+      "name": "Joint_5_Revolute-10",
+      "type": "hinge",
+      "limited": false,
+      "qpos_index": 5
+    }
+  ],
+  "assets": [
+    {
+      "path": "meshes/Base_Joint.stl",
+      "size_bytes": 564184,
+      "sha256": "b1d94a99b99020be2f6ea8b85f131a8fe4f01c1bb18e7af2e3c31862e47892ac"
+    },
+    {
+      "path": "meshes/Joint_1.stl",
+      "size_bytes": 694484,
+      "sha256": "f36ec1e68beaefa726bf12a557cbd1fc2c88558ea113ef11d29af86f2965d369"
+    },
+    {
+      "path": "meshes/Joint_2.stl",
+      "size_bytes": 1060484,
+      "sha256": "0b175d492eb03f7468f0ec4095f2abf9d9a7dfbcec60148d513ca06dbda67552"
+    },
+    {
+      "path": "meshes/Joint_3.stl",
+      "size_bytes": 1466984,
+      "sha256": "90ea07f9c05a8e6bc4904903b3eb76dd87e9611750a9978ce2d1dd6ee39afac2"
+    },
+    {
+      "path": "meshes/Joint_4.stl",
+      "size_bytes": 504884,
+      "sha256": "88d38e9370bd3e96c402ae7dad8b29d565255a6a2dbf1a2d013f10ce5be4977f"
+    },
+    {
+      "path": "meshes/Joint_5.stl",
+      "size_bytes": 501084,
+      "sha256": "28a6385523bb67819fd31a9ee1affcd3d0ffb4f25b49a2f08bbf3732e0b9115c"
+    },
+    {
+      "path": "meshes/Joint_6.stl",
+      "size_bytes": 73084,
+      "sha256": "79165ffe95dd7ddf7f9940f2b714f661fc21be1f8d6e04b7c6a107b6d0716228"
+    }
+  ],
+  "checks_passed": [
+    "all referenced mesh assets exist",
+    "original URDF compiled",
+    "six hinge degrees of freedom",
+    "finite transforms at reference pose",
+    "offscreen landscape and portrait renders"
+  ],
+  "render_pose": "qpos = [0,0,0,0,0,0], the file's zero reference pose",
+  "display_changes": "Added noncolliding ground, pale skybox, lighting, and neutral material color in memory. Arm geometry and source files unchanged.",
+  "limitations": "Six continuous joints have no finite limits in this URDF and the model has zero actuators. Compilation/visualization is verified; physical calibration, safe home pose, contact behavior and controlled dynamics are not validated."
+}

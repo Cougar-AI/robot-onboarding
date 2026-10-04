@@ -1,0 +1,2 @@
+# Common onboarding version with native Intel Mac and Apple Silicon wheels.
+mujoco==3.10.0
