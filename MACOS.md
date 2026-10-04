@@ -30,6 +30,6 @@ Install VS Code (<https://code.visualstudio.com/Download>): open the `.dmg` and 
 
 Optional shortcut: in VS Code press **Cmd+Shift+P**, run **Shell Command: Install 'code' command in PATH**, restart Terminal, then `code .` opens the current folder.
 
-On macOS, run the MuJoCo viewer with `mjpython` (for example `mjpython demo.py`).
+On macOS, run the MuJoCo viewer with `mjpython` (for example `mjpython demo.py`). After you create `.venv` (README section 3), run the **Mac only** `ln -sf ...` command there once; without it `mjpython` cannot find uv's Python library.
 
 **Next:** [README.md, section 2](README.md#2-open-the-folder-in-vs-code) onward.

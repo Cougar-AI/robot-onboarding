@@ -9,8 +9,10 @@ It is not the team's hardware model or a controller for physical motors.
 """
 
 import argparse
+import atexit
 from pathlib import Path
 import platform
+import threading
 import time
 
 import mujoco
@@ -27,6 +29,23 @@ def target_at(t):
     progress = np.clip(t / MOVE_SECONDS, 0.0, 1.0)
     blend = progress * progress * (3.0 - 2.0 * progress)
     return HOME_POSE + blend * (GOAL - HOME_POSE)
+
+
+def finish_viewer_shutdown(threads_before):
+    """Linux/WSL: let the viewer finish closing before Python exits.
+
+    The passive viewer runs in background threads, and closing it only asks them to stop.
+    If Python exits during their teardown, or runs glfw.terminate() from the wrong thread at
+    exit, the process can crash ("Segmentation fault (core dumped)") or hang after the work
+    is done. On macOS, mjpython runs the viewer on the UI thread instead, so skip this there.
+    """
+    if platform.system() == "Darwin":
+        return
+    for thread in set(threading.enumerate()) - threads_before:
+        thread.join(timeout=5)
+    import glfw
+
+    atexit.unregister(glfw.terminate)  # the OS frees the window when the process ends
 
 
 def main():
@@ -54,6 +73,7 @@ def main():
     else:
         from mujoco import viewer as viewer_module
 
+        threads_before = set(threading.enumerate())
         with viewer_module.launch_passive(model, data) as viewer:
             with viewer.lock():
                 viewer.cam.lookat[:] = [0.35, 0.1, 0.3]
@@ -65,6 +85,7 @@ def main():
                 step()
                 viewer.sync()
                 time.sleep(max(0, model.opt.timestep - (time.perf_counter() - start)))
+        finish_viewer_shutdown(threads_before)
 
     error = float(np.max(np.abs(data.qpos - GOAL)))
     print("Final [rad]:", np.round(data.qpos, 4))

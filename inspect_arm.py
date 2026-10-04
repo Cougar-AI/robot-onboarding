@@ -8,11 +8,31 @@ The URDF's continuous joints have no actuators or finite limits. This is a
 static model inspection, not a simulation of motors or a hardware controller.
 """
 import argparse
+import atexit
 from pathlib import Path
+import platform
+import threading
 import time
 
 import mujoco
 import numpy as np
+
+
+def finish_viewer_shutdown(threads_before):
+    """Linux/WSL: let the viewer finish closing before Python exits.
+
+    The passive viewer runs in background threads, and closing it only asks them to stop.
+    If Python exits during their teardown, or runs glfw.terminate() from the wrong thread at
+    exit, the process can crash ("Segmentation fault (core dumped)") or hang after the work
+    is done. On macOS, mjpython runs the viewer on the UI thread instead, so skip this there.
+    """
+    if platform.system() == "Darwin":
+        return
+    for thread in set(threading.enumerate()) - threads_before:
+        thread.join(timeout=5)
+    import glfw
+
+    atexit.unregister(glfw.terminate)  # the OS frees the window when the process ends
 
 
 def main():
@@ -32,6 +52,7 @@ def main():
     if args.check:
         return
     from mujoco import viewer as viewer_module
+    threads_before = set(threading.enumerate())
     with viewer_module.launch_passive(model, data) as viewer:
         with viewer.lock():
             viewer.cam.lookat[:] = [-0.035, 0, 0.415]
@@ -42,6 +63,7 @@ def main():
             # Leave dynamics stopped so the unactuated arm stays visible.
             viewer.sync()
             time.sleep(1 / 60)
+    finish_viewer_shutdown(threads_before)
 
 
 if __name__ == "__main__":

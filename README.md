@@ -76,6 +76,14 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
+**Mac only:** run this once after creating `.venv`, so `mjpython` can find uv's Python library. Without it, `mjpython` stops with `Library not loaded: @executable_path/../lib/libpython3.11.dylib` ([MuJoCo issue #1923](https://github.com/google-deepmind/mujoco/issues/1923)).
+
+```bash
+ln -sf "$(python -c 'import sys; print(sys.base_prefix)')/lib/libpython3.11.dylib" .venv/lib/
+```
+
+Run it again if you ever delete and re-create `.venv`.
+
 If `uv` is still missing, run the shell setup command that the installer printed, or `source "$HOME/.local/bin/env"`. [Official uv installation](https://docs.astral.sh/uv/getting-started/installation/)
 
 **VS Code:** press **Ctrl+Shift+P** (Mac: **Cmd+Shift+P**), run **Python: Select Interpreter**, and choose this project's `.venv`. Its path ends in `.venv/bin/python`.
@@ -202,6 +210,8 @@ The viewer holds the file's zero reference pose. Close the window when you finis
 | `uv: command not found` | Open a new terminal, or run the PATH command the installer printed. |
 | `No module named 'mujoco'` | `source .venv/bin/activate`, then `uv pip install -r requirements.txt`. In VS Code, select the `.venv` interpreter. |
 | Mac: ``launch_passive` requires ... `mjpython` `` | Run `mjpython demo.py` in the activated environment. |
+| Mac: `mjpython` says `Library not loaded: @executable_path/../lib/libpython3.11.dylib` | Run the **Mac only** `ln -sf ...` command from section 3, then `mjpython demo.py` again. |
+| Linux / WSL: `Segmentation fault (core dumped)` or a hang **after** `PASS` | Run `git pull`: the current `demo.py` and `inspect_arm.py` wait for the viewer to close cleanly. The physics result above it was already valid. |
 | Apple Silicon prints `x86_64` | Use a native Terminal (not Rosetta) and make a new `.venv`. |
 | `ParseXML: Error opening file ... arm_demo.xml` | Keep `arm_demo.xml` beside `demo.py`. Run `git status`; `git restore arm_demo.xml` brings it back. |
 | WSL window does not open | PowerShell: `wsl -l -v` must show VERSION 2. Save work, then `wsl --update` and `wsl --shutdown`, and reopen Ubuntu. |
@@ -235,4 +245,5 @@ If you must use the ZIP:
 
 - MuJoCo is pinned to 3.10.0 because its release files include Intel Mac packages as well as Apple Silicon. Revisit the pin together before upgrading. [3.10.0 files](https://pypi.org/project/mujoco/3.10.0/)
 - Verified on Apple Silicon macOS with Python 3.11.13 and MuJoCo 3.10.0, from a fresh `git clone` of this repository: headless exercise PASS, model import check passed.
-- Windows/WSL, Linux desktop, Intel Mac installs and live viewer interaction were not tested here. Those steps follow the official Microsoft, uv and MuJoCo documentation.
+- The viewer was also checked on Oct 4, 2026: 20 runs each of `demo.py` and `inspect_arm.py` on Ubuntu 24.04 (Linux container, X virtual display), and `mjpython` on Apple Silicon macOS, all exiting cleanly. Before the shutdown fix, 8 of 20 `demo.py` runs and 10 of 20 `inspect_arm.py` runs crashed, hung or aborted *after* the work was done.
+- Real Windows/WSL machines, Linux desktops, Intel Macs and live viewer interaction were not tested here. Those steps follow the official Microsoft, uv and MuJoCo documentation.
