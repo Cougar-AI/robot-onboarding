@@ -229,6 +229,27 @@ Do not add guessed `DISPLAY`, `GALLIUM_DRIVER` or `LD_PRELOAD` values to your sh
 
 The teaching demo is the setup check. The milestone is the team's robot moving between agreed poses. Contact **Jonathan Gaucin, Software / Simulation**.
 
+## Week 2: check forward kinematics in MuJoCo
+
+The "Frames, joints and forward kinematics" lesson uses two models. Get them with `git pull`:
+
+| File | What it is |
+|---|---|
+| `two_link_arm.xml` | The flat 2-link arm: L1 = 0.40 m (blue), L2 = 0.30 m (orange). Both joints turn about z. |
+| `teaching_arm_6dof.xml` | The red 6-joint teaching arm: shoulder at H = 0.20 m, L1 = 0.40 m, elbow to hand 0.30 m with the wrist straight. |
+| `fk_check.py` | Sets the joint angles, runs `mj_forward` and prints where the hand is. |
+
+In the activated environment:
+
+```bash
+python fk_check.py two_link 30 60
+python fk_check.py teaching_arm 0.60 0.55 -1.00 0 0 0
+```
+
+Expected: `hand = (0.346, 0.500) m` and `hand = (0.504, 0.345, 0.279) m`, the same as the worked examples on the slides. `two_link` takes 2 angles in degrees. `teaching_arm` takes 6 angles in radians, ordered `j1` to `j6`. Use your own exercise angles to check your hand calculations.
+
+These are teaching arms, not the project arm. The project arm is `RobotArm_Model/Arm.urdf` (section 7).
+
 ## Legacy: you downloaded a ZIP instead of cloning
 
 GitHub's **Code > Download ZIP** gives `robot-onboarding-main.zip`. That copy has **no Git history**, so `git pull` does not work in it. Clone instead (section 1) when you can.

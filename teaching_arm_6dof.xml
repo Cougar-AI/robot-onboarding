@@ -1,0 +1,121 @@
+<!--
+  Teaching arm, 6 joints (MuJoCo 3.x).  Robotic Arm Project Meeting, Simulation track.
+
+  Kinematics (exact, metres / radians):
+    j1  hinge about world z at the base             (positive = counterclockwise seen from above)
+    j2  shoulder pitch, 0.20 m above the floor (H)   (positive = arm up)
+    j3  elbow pitch, 0.40 m from the shoulder (L1)   (positive = arm up)
+    j4  forearm roll about the forearm's long axis, 0.10 m past the elbow
+    j5  wrist pitch, 0.20 m past the elbow           (positive = arm up)
+    j6  tool roll about the tool's long axis, 0.05 m past j5
+    "hand" site: the point between the gripper fingers, 0.10 m past j5
+  With the wrist straight, elbow -> hand = 0.20 + 0.10 = 0.30 m (L2).
+  Zero pose (all angles 0): the arm points straight out along world +x, horizontal.
+  Pitch joints turn about -y (axis "0 -1 0"), so a positive angle raises the arm.
+
+  Check: qpos = (0.60, 0.55, -1.00, 0, 0, 0) -> hand = (0.504, 0.345, 0.279) m
+-->
+<mujoco model="teaching_arm_6dof">
+  <compiler angle="radian" autolimits="true"/>
+  <option timestep="0.002"/>
+
+  <visual>
+    <global offwidth="2400" offheight="1800" azimuth="120" elevation="-25"/>
+    <quality shadowsize="8192" offsamples="8"/>
+    <headlight ambient="0.36 0.36 0.36" diffuse="0.16 0.16 0.16" specular="0.05 0.05 0.05"/>
+    <map znear="0.01" zfar="50" haze="0.6"/>
+    <rgba haze="0.90 0.91 0.94 1"/>
+  </visual>
+
+  <statistic center="0.3 0 0.25" extent="1.0"/>
+
+  <asset>
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.97 0.98 1.0" rgb2="0.88 0.90 0.93" width="512" height="3072"/>
+    <!-- checker: one square = 10 cm -->
+    <texture name="checker" type="2d" builtin="checker" rgb1="0.87 0.88 0.90" rgb2="0.78 0.79 0.82" width="512" height="512"/>
+    <material name="floor" texture="checker" texrepeat="5 5" texuniform="true" reflectance="0" specular="0.1" shininess="0.1"/>
+    <material name="red" rgba="0.74 0.11 0.13 1" specular="0.35" shininess="0.5"/>
+    <material name="black" rgba="0.07 0.07 0.08 1" specular="0.3" shininess="0.6"/>
+    <material name="gray" rgba="0.58 0.59 0.62 1" specular="0.3" shininess="0.4"/>
+    <material name="steel" rgba="0.72 0.74 0.77 1" specular="0.6" shininess="0.8"/>
+  </asset>
+
+  <default>
+    <joint damping="0.5" armature="0.01" range="-2.9 2.9"/>
+    <!-- arm parts touch the floor but not each other -->
+    <geom contype="1" conaffinity="0" density="400"/>
+    <position kp="50" dampratio="1" ctrlrange="-2.9 2.9"/>
+    <site group="3"/>
+  </default>
+
+  <worldbody>
+    <light name="key" directional="true" pos="0.6 -1.2 2.6" dir="-0.2 0.45 -1" diffuse="0.50 0.50 0.50" specular="0.25 0.25 0.25" castshadow="true"/>
+    <light name="fill" directional="true" pos="-1.5 1.5 2.0" dir="0.6 -0.6 -1" diffuse="0.14 0.14 0.15" specular="0 0 0" castshadow="false"/>
+    <geom name="floor" type="plane" size="0 0 0.05" material="floor" contype="0" conaffinity="1"/>
+
+    <!-- fixed base (ground): no free joint -->
+    <body name="base">
+      <geom name="base_plate" type="cylinder" size="0.13 0.012" pos="0 0 0.012" material="gray"/>
+      <geom name="base_column" type="cylinder" size="0.085 0.045" pos="0 0 0.069" material="gray"/>
+
+      <body name="turret" pos="0 0 0.114" gravcomp="1">
+        <joint name="j1" axis="0 0 1"/>
+        <geom name="turret" type="cylinder" size="0.06 0.035" pos="0 0 0.035" material="black"/>
+
+        <!-- shoulder: H = 0.20 m above the floor -->
+        <body name="upper_arm" pos="0 0 0.086" gravcomp="1">
+          <joint name="j2" axis="0 -1 0"/>
+          <geom name="j2_housing" type="cylinder" size="0.058 0.052" zaxis="0 1 0" material="black"/>
+          <geom name="upper_link" type="capsule" fromto="0.05 0 0  0.35 0 0" size="0.036" material="red"/>
+
+          <!-- elbow: L1 = 0.40 m -->
+          <body name="forearm" pos="0.40 0 0" gravcomp="1">
+            <joint name="j3" axis="0 -1 0"/>
+            <geom name="j3_housing" type="cylinder" size="0.05 0.046" zaxis="0 1 0" material="black"/>
+            <geom name="forearm_link" type="capsule" fromto="0.045 0 0  0.085 0 0" size="0.03" material="red"/>
+
+            <!-- forearm roll, 0.10 m past the elbow -->
+            <body name="forearm2" pos="0.10 0 0" gravcomp="1">
+              <joint name="j4" axis="1 0 0"/>
+              <geom name="j4_housing" type="cylinder" size="0.037 0.022" zaxis="1 0 0" material="black"/>
+              <geom name="forearm2_link" type="capsule" fromto="0.02 0 0  0.07 0 0" size="0.027" material="red"/>
+
+              <!-- wrist pitch, 0.20 m past the elbow -->
+              <body name="wrist" pos="0.10 0 0" gravcomp="1">
+                <joint name="j5" axis="0 -1 0"/>
+                <geom name="j5_housing" type="cylinder" size="0.034 0.036" zaxis="0 1 0" material="black"/>
+                <geom name="wrist_link" type="capsule" fromto="0.025 0 0  0.04 0 0" size="0.021" material="red"/>
+
+                <!-- tool roll, 0.05 m past j5 -->
+                <body name="tool" pos="0.05 0 0" gravcomp="1">
+                  <joint name="j6" axis="1 0 0"/>
+                  <geom name="j6_flange" type="cylinder" size="0.03 0.008" zaxis="1 0 0" material="black"/>
+                  <geom name="palm" type="box" size="0.007 0.032 0.013" pos="0.015 0 0" material="steel"/>
+                  <geom name="finger_left" type="box" size="0.026 0.005 0.009" pos="0.047 0.021 0" material="steel"/>
+                  <geom name="finger_right" type="box" size="0.026 0.005 0.009" pos="0.047 -0.021 0" material="steel"/>
+                  <!-- hand point: between the fingers, 0.10 m past j5 -->
+                  <site name="hand" pos="0.05 0 0" size="0.009" rgba="1.0 0.72 0.1 1" group="0"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="j1" joint="j1"/>
+    <position name="j2" joint="j2"/>
+    <position name="j3" joint="j3"/>
+    <position name="j4" joint="j4"/>
+    <position name="j5" joint="j5"/>
+    <position name="j6" joint="j6"/>
+  </actuator>
+
+  <keyframe>
+    <key name="zero" qpos="0 0 0 0 0 0" ctrl="0 0 0 0 0 0"/>
+    <key name="check_slide34" qpos="0.60 0.55 -1.00 0 0 0" ctrl="0.60 0.55 -1.00 0 0 0"/>
+    <key name="check_wrist" qpos="0.55 0.45 -0.95 0 0.35 0" ctrl="0.55 0.45 -0.95 0 0.35 0"/>
+  </keyframe>
+</mujoco>
