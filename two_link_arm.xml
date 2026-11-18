@@ -1,18 +1,24 @@
 <!--
-  Flat 2-link arm (MuJoCo 3.x).  Robotic Arm Project Meeting, Simulation track.
+  Flat 2-link arm (MuJoCo 3.x).  Robotic Arm Project Meeting, Simulation track, Weeks 2 and 3.
 
-  Both joints turn about world z, so everything happens in the x-y plane.
-    j1  at the world origin            L1 = 0.40 m  (blue link)
-    j2  at the elbow                   L2 = 0.30 m  (orange link)
-    "elbow" site at the end of link 1, "hand" site at the tip of link 2.
+  Both joints turn about world z, so the arm moves in the x-y plane, 0.05 m above the floor.
+    joint "shoulder"  at the base, (0, 0, 0.05)     L1 = 0.40 m  (blue link 1)
+    joint "elbow"     at the end of link 1          L2 = 0.30 m  (orange link 2)
+    "elbow" site at the end of link 1, "hand" site at the tip of link 2 (red dot).
   Zero pose: both links point along world +x.  Positive angles turn counterclockwise seen from above.
-  MuJoCo stores joint angles in RADIANS: convert degrees first (np.deg2rad).
+  MuJoCo stores joint angles in RADIANS: convert degrees first (np.radians).
 
-  Check: theta = (30 deg, 60 deg) -> hand = (0.346, 0.500) m
+  Motors, in <actuator>: "shoulder_motor" and "elbow_motor" are position motors.
+  data.ctrl holds their target angles (radians). Each motor pulls its joint toward the target
+  like a spring (kp = stiffness) with a damper (kv = damping). The damping is strong, so it barely swings past the target (the elbow by about 0.01 deg).
+  Gravity points along -z, so it cannot turn these joints.
+
+  Check: angles (30 deg, 60 deg) -> hand = (0.346, 0.500, 0.050) m
 -->
 <mujoco model="two_link_arm">
   <compiler angle="radian" autolimits="true"/>
-  <option timestep="0.002"/>
+  <!-- one time step = 0.002 s; the implicitfast integrator keeps the strong motor damping stable -->
+  <option timestep="0.002" integrator="implicitfast"/>
 
   <visual>
     <global offwidth="2400" offheight="1800" azimuth="120" elevation="-35"/>
@@ -28,7 +34,7 @@
     <texture name="sky" type="skybox" builtin="gradient" rgb1="0.97 0.98 1.0" rgb2="0.88 0.90 0.93" width="512" height="3072"/>
     <!-- checker: one square = 10 cm -->
     <texture name="checker" type="2d" builtin="checker" rgb1="0.87 0.88 0.90" rgb2="0.78 0.79 0.82" width="512" height="512"/>
-    <material name="floor" texture="checker" texrepeat="5 5" texuniform="true" reflectance="0" specular="0.1" shininess="0.1"/>
+    <material name="floor" texture="checker" texrepeat="10 10" texuniform="true" reflectance="0" specular="0.1" shininess="0.1"/>
     <material name="blue" rgba="0.18 0.44 0.84 1" specular="0.35" shininess="0.5"/>
     <material name="orange" rgba="0.85 0.44 0.10 1" specular="0.35" shininess="0.5"/>
     <material name="black" rgba="0.07 0.07 0.08 1" specular="0.3" shininess="0.6"/>
@@ -38,7 +44,7 @@
   <default>
     <joint damping="0.2" armature="0.005" range="-3.1 3.1"/>
     <geom contype="0" conaffinity="0" density="400"/>
-    <position kp="20" dampratio="1" ctrlrange="-3.1 3.1"/>
+    <position ctrlrange="-3.1 3.1"/>
   </default>
 
   <worldbody>
@@ -47,29 +53,30 @@
     <geom name="floor" type="plane" size="0 0 0.05" material="floor"/>
 
     <!-- fixed base at the world origin -->
-    <geom name="base_disk" type="cylinder" size="0.07 0.008" pos="0 0 0.008" material="gray"/>
+    <geom name="base_disk" type="cylinder" size="0.07 0.014" pos="0 0 0.014" material="gray"/>
 
-    <!-- links ride 4 cm above the floor -->
-    <body name="link1" pos="0 0 0.04">
-      <joint name="j1" axis="0 0 1"/>
-      <geom name="j1_housing" type="cylinder" size="0.032 0.022" material="black"/>
-      <geom name="link1" type="capsule" fromto="0 0 0  0.40 0 0" size="0.016" material="blue"/>
+    <!-- link 1: its frame sits 0.05 m above the floor -->
+    <body name="link1" pos="0 0 0.05">
+      <joint name="shoulder" type="hinge" axis="0 0 1"/>
+      <geom type="capsule" fromto="0 0 0  0.4 0 0" size="0.016" material="blue"/>
+      <geom name="shoulder_housing" type="cylinder" size="0.032 0.022" material="black"/>
 
-      <!-- elbow: L1 = 0.40 m -->
-      <body name="link2" pos="0.40 0 0">
-        <joint name="j2" axis="0 0 1"/>
-        <geom name="j2_housing" type="cylinder" size="0.028 0.02" material="black"/>
-        <geom name="link2" type="capsule" fromto="0 0 0  0.30 0 0" size="0.013" material="orange"/>
-        <site name="elbow" pos="0 0 0" size="0.01" rgba="0 0 0 0"/>
+      <!-- link 2 starts at the elbow: L1 = 0.40 m along link 1 -->
+      <body name="link2" pos="0.4 0 0">
+        <joint name="elbow" type="hinge" axis="0 0 1"/>
+        <geom type="capsule" fromto="0 0 0  0.3 0 0" size="0.013" material="orange"/>
         <!-- hand: L2 = 0.30 m past the elbow -->
-        <site name="hand" pos="0.30 0 0" size="0.018" rgba="0.80 0.10 0.12 1"/>
+        <site name="hand" pos="0.3 0 0" size="0.018" rgba="0.80 0.10 0.12 1"/>
+        <geom name="elbow_housing" type="cylinder" size="0.028 0.02" material="black"/>
+        <site name="elbow" pos="0 0 0" size="0.01" rgba="0 0 0 0"/>
       </body>
     </body>
   </worldbody>
 
   <actuator>
-    <position name="j1" joint="j1"/>
-    <position name="j2" joint="j2"/>
+    <!-- each motor names the joint it drives; data.ctrl = [shoulder target, elbow target] in radians -->
+    <position name="shoulder_motor" joint="shoulder" kp="100" kv="20"/>
+    <position name="elbow_motor" joint="elbow" kp="20" kv="1"/>
   </actuator>
 
   <keyframe>

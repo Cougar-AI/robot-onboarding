@@ -76,10 +76,10 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-**Mac only:** run this once after creating `.venv`, so `mjpython` can find uv's Python library. Without it, `mjpython` stops with `Library not loaded: @executable_path/../lib/libpython3.11.dylib` ([MuJoCo issue #1923](https://github.com/google-deepmind/mujoco/issues/1923)).
+**Mac only:** run this once after creating `.venv`, with `.venv` activated, so `mjpython` can find uv's Python library. It works from any folder in the project. Without it, `mjpython` stops with `Library not loaded: @executable_path/../lib/libpython3.11.dylib` ([MuJoCo issue #1923](https://github.com/google-deepmind/mujoco/issues/1923)).
 
 ```bash
-ln -sf "$(python -c 'import sys; print(sys.base_prefix)')/lib/libpython3.11.dylib" .venv/lib/
+ln -sf "$(python -c 'import sys; print(sys.base_prefix)')/lib/libpython3.11.dylib" "$VIRTUAL_ENV/lib/"
 ```
 
 Run it again if you ever delete and re-create `.venv`.
@@ -208,12 +208,15 @@ The viewer holds the file's zero reference pose. Close the window when you finis
 | Windows: `PS C:\...>` prompt, or VS Code shows no **WSL: Ubuntu** label | You are in PowerShell / Windows. Open **Ubuntu**, then `cd ~/robot-onboarding` and `code .`. Clone inside Ubuntu, not in PowerShell. |
 | `code: command not found` (Mac) | Use **File > Open Folder**, or install the `code` command (section 2). |
 | `uv: command not found` | Open a new terminal, or run the PATH command the installer printed. |
-| `No module named 'mujoco'` | `source .venv/bin/activate`, then `uv pip install -r requirements.txt`. In VS Code, select the `.venv` interpreter. |
-| Mac: ``launch_passive` requires ... `mjpython` `` | Run `mjpython demo.py` in the activated environment. |
-| Mac: `mjpython` says `Library not loaded: @executable_path/../lib/libpython3.11.dylib` | Run the **Mac only** `ln -sf ...` command from section 3, then `mjpython demo.py` again. |
+| `command not found: python` (Mac) or `Command 'python' not found` (Ubuntu/WSL) | The environment is not active. Run `source ~/robot-onboarding/.venv/bin/activate` (it works from any folder). Do not install `python-is-python3` or switch to `python3`. |
+| `No module named 'mujoco'` (or `'numpy'`) | Run `source ~/robot-onboarding/.venv/bin/activate`, then `uv pip install -r ~/robot-onboarding/requirements.txt` (both work from any folder). Then run the same command again. In VS Code, select the `.venv` interpreter. |
+| Mac: `` `launch_passive` requires ... `mjpython` `` | Run the same script with `mjpython` instead of `python` in the activated environment, for example `mjpython demo.py` or `mjpython watch_it.py`. |
+| Mac: `mjpython` says `Library not loaded: @executable_path/../lib/libpython3.11.dylib` | Run the **Mac only** `ln -sf ...` command from section 3, then the same `mjpython` command again. |
 | Linux / WSL: `Segmentation fault (core dumped)` or a hang **after** `PASS` | Run `git pull`: the current `demo.py` and `inspect_arm.py` wait for the viewer to close cleanly. The physics result above it was already valid. |
 | Apple Silicon prints `x86_64` | Use a native Terminal (not Rosetta) and make a new `.venv`. |
 | `ParseXML: Error opening file ... arm_demo.xml` | Keep `arm_demo.xml` beside `demo.py`. Run `git status`; `git restore arm_demo.xml` brings it back. |
+| `ParseXML: Error opening file '../two_link_arm.xml'` (or `'../teaching_arm_6dof.xml'`) | You are not in `week3`. Run `cd ~/robot-onboarding/week3`, then start the script by its name only, without `week3/` (for example `python check_fk.py`). Type Week 3 commands in the terminal: VS Code's **Run** button starts in the repo root. |
+| `python: can't open file '.../check_fk.py'` (or another Week 3 script) | You are not in `week3`. Run `cd ~/robot-onboarding/week3`, then the same command again. |
 | WSL window does not open | PowerShell: `wsl -l -v` must show VERSION 2. Save work, then `wsl --update` and `wsl --shutdown`, and reopen Ubuntu. |
 | Linux / WSL display or OpenGL error | `echo "$DISPLAY"` and `glxinfo -B`. `llvmpipe` means software rendering: update the graphics driver. |
 
@@ -249,6 +252,42 @@ python fk_check.py teaching_arm 0.60 0.55 -1.00 0 0 0
 Expected: `hand = (0.346, 0.500) m` and `hand = (0.504, 0.345, 0.279) m`, the same as the worked examples on the slides. `two_link` takes 2 angles in degrees. `teaching_arm` takes 6 angles in radians, ordered `j1` to `j6`. Use your own exercise angles to check your hand calculations.
 
 These are teaching arms, not the project arm. The project arm is `RobotArm_Model/Arm.urdf` (section 7).
+
+## Week 3: MuJoCo basics (model, loop, move, read)
+
+The Week 3 scripts are in `week3/`. Get them with `git pull`, then run every command from that folder, typed in the terminal. The scripts load the models one folder up (`../two_link_arm.xml`). VS Code's **Run** button starts in the repo root instead, and the scripts then stop with `ParseXML: Error opening file`.
+
+```bash
+cd ~/robot-onboarding
+git pull
+cd week3
+source ../.venv/bin/activate
+```
+
+`two_link_arm.xml` changed for Week 3: its joints are now named `shoulder` and `elbow` (the Week 2 slides call them j1 and j2), and each joint has a position motor (`shoulder_motor`, `elbow_motor`). `fk_check.py` and the Week 2 answers do not change.
+
+| Script | What it does | Expected output (MuJoCo 3.10.0) |
+|---|---|---|
+| `check_fk.py` | Sets 30° and 60°, runs `mj_forward`, and prints the hand twice: from the Week 2 formula (`by hand:`) and from MuJoCo (`MuJoCo:`) | `MuJoCo:  (0.346, 0.500, 0.050)` |
+| `read_by_name.py` | Reads a joint angle, a body position, a body's axes (`xmat`) and a site by name | `hand position:  [0.346 0.5   0.05 ]` |
+| `sweep_circle.py` | Turns the shoulder 0° to 180° with the elbow straight | `r = 0.700` on every line |
+| `move_with_motors.py` | Sets motor targets in `data.ctrl` and runs `mj_step` for 2 s | `2.00 s  30.0 60.0 deg  hand (0.346, 0.500)` |
+| `check_arm6.py` | The same check on the 6-joint teaching arm | `hand = (0.504, 0.345, 0.279) m` |
+| `watch_it.py` | The simulation loop, live in the viewer | the arm moves to 30°, 60° |
+
+Open a model in MuJoCo's viewer (plain `python` works on every system):
+
+```bash
+python -m mujoco.viewer --mjcf=../two_link_arm.xml
+```
+
+`watch_it.py` uses `launch_passive`. On macOS run it with `mjpython watch_it.py` (do the **Mac only** step in section 3 first); on Windows (WSL) and Linux use `python watch_it.py`. It runs until you close the viewer window. Close the window to stop it: on Linux/WSL, Ctrl+C skips the clean close and can end with `Segmentation fault (core dumped)`, which is harmless.
+
+`check_fk.py` also takes a model file, then two angles in degrees, for the edit-predict-check challenges: copy the model (`cp ../two_link_arm.xml my_arm.xml`), edit the copy, then run `python check_fk.py my_arm.xml 30 60`. It is not Week 2's `fk_check.py`: its first argument is a file, not an arm name like `two_link`.
+
+If you edit `../two_link_arm.xml` itself (the motor TRY IT in class), undo it afterwards with `git restore ../two_link_arm.xml`, so `git pull` keeps working.
+
+Check your Week 2 project-arm sketch: from `week3`, run `python -m mujoco.viewer --mjcf=../RobotArm_Model/Arm.urdf`. The arm has no motors, so it falls while the simulation runs. Press **Space** to pause and **Backspace** to reset it to the zero pose (straight up). Then open the **Joint** panel and drag one slider at a time. `Base_Joint_Joint1` is j1, `Joint_1_Joint2` is j2, and so on to `Joint_5_Revolute-10` (j6).
 
 ## Legacy: you downloaded a ZIP instead of cloning
 

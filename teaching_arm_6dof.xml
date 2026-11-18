@@ -31,7 +31,7 @@
 
   <asset>
     <texture name="sky" type="skybox" builtin="gradient" rgb1="0.97 0.98 1.0" rgb2="0.88 0.90 0.93" width="512" height="3072"/>
-    <!-- checker: one square = 10 cm -->
+    <!-- checker: one square = 20 cm (two_link_arm.xml uses 10 cm squares) -->
     <texture name="checker" type="2d" builtin="checker" rgb1="0.87 0.88 0.90" rgb2="0.78 0.79 0.82" width="512" height="512"/>
     <material name="floor" texture="checker" texrepeat="5 5" texuniform="true" reflectance="0" specular="0.1" shininess="0.1"/>
     <material name="red" rgba="0.74 0.11 0.13 1" specular="0.35" shininess="0.5"/>
